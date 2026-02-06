@@ -23,6 +23,21 @@ app.set("views", "./views");
 app.use(expressLayouts);
 app.set("layout", "layout");
 
+// Middleware para definir el título de la página (namePage) en todas las vistas
+const pageTitleByPath = {
+  "/": "Inicio",
+  "/cart": "Carrito",
+  "/checkout": "Checkout",
+  "/order-confirmation": "Confirmación de compra",
+  "/about": "Quienes somos",
+  "/terms": "Términos y Condiciones",
+  "/privacy": "Política de Privacidad",
+};
+app.use((req, res, next) => {
+  res.locals.namePage = pageTitleByPath[req.path] || "Full Stock";
+  next();
+});
+
 // Path de mi data.json
 const DATA_PATH = path.join("data", "data.json"); // "./data/data.json"
 
@@ -49,7 +64,10 @@ app.get("/category/:slug", async (req, res) => {
   );
 
   if (!categoryFind) {
-    return res.status(404).render("404");
+    return res.status(404).render("404", {
+      namePage: "Página no encontrada",
+      message: "La página que estás buscando no existe o ha sido movida",
+    });
   }
 
   // Obtenemos todos los productos que tengan la categoria encontrada
@@ -64,9 +82,29 @@ app.get("/category/:slug", async (req, res) => {
   });
 });
 
-app.get("/product/:id", (req, res) => {
+app.get("/products/:id", async (req, res) => {
+  const { id: productId } = req.params;
+  console.log("product id: ", productId);
+
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+  const data = JSON.parse(dataJson);
+
+  const { products } = data;
+
+  const product = products.find(
+    (product) => product.id === parseInt(productId),
+  );
+
+  if (!product) {
+    return res.status(404).render("404", {
+      namePage: "Página no encontrada",
+      message: `Producto con el id ${productId} no existe`,
+    });
+  }
+
   res.render("product", {
-    namePage: "Producto",
+    namePage: product.name,
+    product,
   });
 });
 

@@ -78,9 +78,28 @@ app.get("/category/:slug", async (req, res) => {
   });
 });
 
-app.get("/product/:id", (req, res) => {
+app.get("/product/:id", async (req, res) => {
+  // Capturar el id del parámetro de ruta y convertirlo a número
+  const productId = Number(req.params.id);
+
+  // Leer y parsear data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+  const data = JSON.parse(dataJson);
+
+  // Buscar el producto cuyo id coincida
+  const product = data.products.find((p) => p.id === productId);
+
+  // Si no existe, renderizar 404
+  if (!product) {
+    return res.status(404).render("404", {
+      namePage: "Error",
+    });
+  }
+
+  // Si existe, renderizar product pasando el producto como local
   res.render("product", {
-    namePage: "Producto",
+    namePage: product.name,
+    product: product,
   });
 });
 

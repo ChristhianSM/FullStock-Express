@@ -2,6 +2,7 @@ import express from "express";
 import expressLayouts from "express-ejs-layouts";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { parsePriceToCents } from "./utils.js";
 
 // Puerto de escucha de peticiones
 const PORT = 3000;
@@ -34,7 +35,8 @@ const pageTitleByPath = {
   "/privacy": "Política de Privacidad",
 };
 app.use((req, res, next) => {
-  res.locals.namePage = pageTitleByPath[req.path] || "Full Stock";
+  const { path } = req;
+  res.locals.namePage = pageTitleByPath[path] || "Full Stock";
   next();
 });
 
@@ -46,15 +48,43 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.get("/category/:slug", async (req, res) => {
+app.get("/categories/:slug", async (req, res) => {
   const { slug: categorySlug } = req.params;
-  const { minPrice: minPriceQuery, maxPrice: maxPriceQuery } = req.query;
+  const {
+    minPrice: minPriceQuery,
+    maxPrice: maxPriceQuery,
+    error: errorQuery,
+  } = req.query;
 
-  console.log({ minPriceQuery, maxPriceQuery });
+  const showErrorUI = errorQuery === "true";
 
   // Validar los queries Strings
-  const minPrice = minPriceQuery ? Number(minPriceQuery) : -Infinity; // product.price > -Infinity
-  const maxPrice = maxPriceQuery ? Number(maxPriceQuery) : Infinity; // product.price < Infinity
+  const minPriceCents = parsePriceToCents(minPriceQuery);
+  const maxPriceCents = parsePriceToCents(maxPriceQuery);
+
+  const minPrice = minPriceCents ?? -Infinity; // product.price > -Infinity
+  const maxPrice = maxPriceCents ?? Infinity; // product.price < Infinity
+
+  // Detectar si el usuario ENVIO un query inválido
+  const invalidMin = minPriceQuery !== undefined && minPriceCents === null;
+  const invalidMax = maxPriceQuery !== undefined && maxPriceCents === null;
+
+  let priceFilterError = null;
+
+  if (invalidMin) {
+    priceFilterError = "MIN_INVALID";
+  } else if (invalidMax) {
+    priceFilterError = "MAX_INVALID";
+  } else if (minPrice > maxPrice) {
+    priceFilterError = "MIN_GREATER_THAN_MAX";
+  }
+
+  const priceErrorMessages = {
+    MIN_INVALID: "El precio mínimo debe ser un número válido.",
+    MAX_INVALID: "El precio máximo debe ser un número válido.",
+    MIN_GREATER_THAN_MAX:
+      "El precio mínimo no puede ser mayor que el precio máximo.",
+  };
 
   // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
@@ -74,49 +104,71 @@ app.get("/category/:slug", async (req, res) => {
     return res.status(404).render("404", {
       namePage: "Página no encontrada",
       message: "La página que estás buscando no existe o ha sido movida",
+      buttonText: "Volver atrás",
     });
   }
 
   // Obtenemos todos los productos que tengan la categoria encontrada
-  const productsFilter = products.filter(
-    (product) =>
-      product.categoryId === categoryFind.id &&
-      product.price / 100 >= minPrice &&
-      product.price / 100 <= maxPrice,
+  const categoryProducts = products.filter(
+    (product) => product.categoryId === categoryFind.id,
   );
+
+  if (priceFilterError && showErrorUI) {
+    return res.status(400).render("404", {
+      namePage: "Error en los filtros",
+      message: priceErrorMessages[priceFilterError],
+      buttonText: "Volver atrás",
+    });
+  }
+
+  // Si los filtros de precio son válidos, aplicamos el filtro por rango
+  let productsFilter = categoryProducts;
+  if (!priceFilterError) {
+    productsFilter = categoryProducts.filter(
+      (product) => product.price >= minPrice && product.price <= maxPrice,
+    );
+  }
+
+  let noResultsMessage = '';
+
+  // En caso no hay algun error de filtrado y el arreglo productsFilter está vacio 
+  if (!priceFilterError && productsFilter.length === 0) {
+    noResultsMessage = 'No hay productos que coincidan con los filtros seleccionados';
+  }
 
   res.render("category", {
     namePage: categoryFind.name,
     category: categoryFind,
     products: productsFilter,
-    minPrice: minPriceQuery || "",
-    maxPrice: maxPriceQuery || "",
+    noResultsMessage,
+    minPrice: minPriceCents !== null ? (minPriceCents / 100).toString() : "",
+    maxPrice: maxPriceCents !== null ? (maxPriceCents / 100).toString() : "",
   });
 });
 
 app.get("/products/:id", async (req, res) => {
   const { id: productId } = req.params;
-  console.log("product id: ", productId);
 
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
   const data = JSON.parse(dataJson);
 
   const { products } = data;
 
-  const product = products.find(
+  const foundProduct = products.find(
     (product) => product.id === parseInt(productId),
   );
 
-  if (!product) {
+  if (!foundProduct) {
     return res.status(404).render("404", {
       namePage: "Página no encontrada",
       message: `Producto con el id ${productId} no existe`,
+      buttonText: "Volver atrás",
     });
   }
 
   res.render("product", {
-    namePage: product.name,
-    product,
+    namePage: foundProduct.name,
+    product: foundProduct,
   });
 });
 

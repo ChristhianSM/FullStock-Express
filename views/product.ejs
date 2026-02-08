@@ -20,9 +20,9 @@
       <div class="product__features">
         <h2 class="product__features_title">Características</h2>
         <ul class="product__features_list">
-          <% for (const feature of product.features) { %>
-            <li><%= feature %></li>
-          <% } %>
+          <% product.features.forEach((feature, index) => { %>
+          <li id="feature-<%= index %>"><%= feature %></li>
+          <% }) %>
         </ul>
       </div>
     </div>

@@ -1,9 +1,11 @@
 <section class="section container not-found">
   <div class="not-found__content">
-    <h1 class="not-found__title"><%= namePage %></h1>
+    <h1 class="not-found__title">
+      <%= namePage %>
+    </h1>
     <p class="not-found__message">
       <%= message %>
     </p>
-    <a href="/" class="button button--primary button--lg">Volver al Inicio</a>
+    <a href="javascript:history.back()" class="button button--primary button--lg"><%= buttonText %></a>
   </div>
 </section>

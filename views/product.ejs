@@ -21,13 +21,11 @@
       <div class="product__features">
         <h2 class="product__features_title">Características</h2>
         <ul class="product__features_list">
-          <% for (const feature of product?.features) { %>
-            <% const safeId="feat-" +
-              feature.toLowerCase().replace(/\s+/g, '-' ); %>
-              <li id="<%= safeId %>">
-                <%= feature %>
-              </li>
-              <% } %>
+          <% product?.features.forEach((feature, index)=> { %>
+            <li id="feat-<%= index %>">
+              <%= feature %>
+            </li>
+            <% }) %>
         </ul>
       </div>
     </div>

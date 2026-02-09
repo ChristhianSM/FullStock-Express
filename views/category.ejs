@@ -59,7 +59,7 @@
               <p class="product-card__description">
                 <%= product.description %>
               </p>
-              <p class="product-card__price">S/ <%= product.price / 100 %></p>
+              <p class="product-card__price">S/ <%= (product?.price/100).toFixed(2) %></p>
             </div>
           </div>
         </a>

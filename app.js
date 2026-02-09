@@ -80,17 +80,17 @@ app.get("/product/:id", async (req, res) => {
   // Desestructuramos el data en products
   const { products } = data;
   // buscar el producto por id
-  const product = products.find((p) => p.id === Number(id));
+  const productFound = products.find((product) => product.id === Number(id));
   //validamos que el producto exista
-  if (!product) {
+  if (!productFound) {
     return res.status(404).render("404", {
       namePage: "Producto no encontrado",
     });
   }
 
   res.render("product", {
-    namePage: product.name,
-    product: product,
+    namePage: productFound.name,
+    product: productFound,
   });
 });
 

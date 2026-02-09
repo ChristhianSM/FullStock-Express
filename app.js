@@ -37,7 +37,6 @@ app.get("/", (req, res) => {
 app.get("/categories/:slug", async (req, res) => {
   const { slug: categorySlug } = req.params;
   const { minPrice: minPriceQuery, maxPrice: maxPriceQuery, error } = req.query;
-  console.log(minPriceQuery, maxPriceQuery, error);
 
   // Validar los queries Strings
   const minPrice = parsePriceToCents(minPriceQuery) ?? -Infinity; // product.price > -Infinity

@@ -2,6 +2,7 @@ import express from "express";
 import expressLayouts from "express-ejs-layouts";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { parsePriceToCents, validationMaxMinPrice, isString } from "./utils.js";
 
 // Puerto de escucha de peticiones
 const PORT = 3000;
@@ -29,20 +30,30 @@ const DATA_PATH = path.join("data", "data.json"); // "./data/data.json"
 // Rutas
 app.get("/", (req, res) => {
   res.render("index", {
-    namePage: "Inicio"
+    namePage: "Inicio",
   });
 });
 
-app.get("/category/:slug", async (req, res) => {
+app.get("/categories/:slug", async (req, res) => {
   const { slug: categorySlug } = req.params;
-  const { minPrice: minPriceQuery, maxPrice: maxPriceQuery } = req.query;
-
-  console.log({ minPriceQuery, maxPriceQuery });
+  const { minPrice: minPriceQuery, maxPrice: maxPriceQuery, error } = req.query;
+  console.log(minPriceQuery, maxPriceQuery, error);
 
   // Validar los queries Strings
-  const minPrice = minPriceQuery ? Number(minPriceQuery) : -Infinity; // product.price > -Infinity
-  const maxPrice = maxPriceQuery ? Number(maxPriceQuery) : Infinity; // product.price < Infinity
+  const minPrice = parsePriceToCents(minPriceQuery) ?? -Infinity; // product.price > -Infinity
+  const maxPrice = parsePriceToCents(maxPriceQuery) ?? Infinity; // product.price < Infinity
 
+  if (error === "true") {
+    //validamos que los rangos de precios sean numeros
+    if (minPriceQuery !== undefined && maxPriceQuery !== undefined) {
+      if (isString(minPriceQuery) || isString(maxPriceQuery)) {
+        return res.status(400).render("404", {
+          namePage: "Error en los parámetros de precio",
+          message: `Los valores de precio deben ser numéricos.`,
+        });
+      }
+    }
+  }
   // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
 
@@ -53,37 +64,45 @@ app.get("/category/:slug", async (req, res) => {
   const { categories, products } = data;
 
   // Obtenemos el id de la category que el usuario clickeo
-  const categoryFind = categories.find(
+  const categoryFound = categories.find(
     (category) => category.slug.toLowerCase() === categorySlug.toLowerCase(), // tazas12345
   );
 
-  if (!categoryFind) {
+  if (!categoryFound) {
     return res.status(404).render("404", {
       namePage: "Categoria no encontrada",
+      message: `No se encontró la categoría con slug "${categorySlug}"`,
+    });
+  }
+  if (!validationMaxMinPrice(minPrice, maxPrice)) {
+    return res.status(400).render("404", {
+      namePage: "Error en los parámetros de precio",
+      message: `El precio mínimo no puede ser mayor que el precio máximo.`,
     });
   }
 
   // Obtenemos todos los productos que tengan la categoria encontrada
-  const productsFilter = products.filter(
+  const productsFiltered = products.filter(
     (product) =>
-      product.categoryId === categoryFind.id &&
-      product.price / 100 >= minPrice &&
-      product.price / 100 <= maxPrice,
+      product.categoryId === categoryFound.id &&
+      product.price >= minPrice &&
+      product.price <= maxPrice,
   );
-
+  const maxPriceCleaned= maxPrice === Infinity ? "" : (maxPrice / 100).toFixed(2);
+  const minPriceCleaned= minPrice === -Infinity ? "" : (minPrice / 100).toFixed(2);
   res.render("category", {
-    namePage: categoryFind.name,
-    category: categoryFind,
-    products: productsFilter,
-    minPrice: minPriceQuery || "",
-    maxPrice: maxPriceQuery || "",
+    namePage: categoryFound.name,
+    category: categoryFound,
+    products: productsFiltered,
+    minPrice: minPriceCleaned,
+    maxPrice: maxPriceCleaned,
   });
 });
 
 app.get("/product/:id", async (req, res) => {
   const { id } = req.params;
 
-   // Leer mi archivo data.json
+  // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
 
   // Convertir el json a objeto
@@ -97,6 +116,7 @@ app.get("/product/:id", async (req, res) => {
   if (!productFound) {
     return res.status(404).render("404", {
       namePage: "Producto no encontrado",
+      message: `No se encontró el producto con id "${id}"`,
     });
   }
 

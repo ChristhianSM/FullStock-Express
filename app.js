@@ -35,6 +35,13 @@ app.get("/", (req, res) => {
 
 app.get("/category/:slug", async (req, res) => {
   const { slug: categorySlug } = req.params;
+  const { minPrice: minPriceQuery, maxPrice: maxPriceQuery } = req.query;
+
+  console.log({ minPriceQuery, maxPriceQuery });
+
+  // Validar los queries Strings
+  const minPrice = minPriceQuery ? Number(minPriceQuery) : -Infinity; // product.price > -Infinity
+  const maxPrice = maxPriceQuery ? Number(maxPriceQuery) : Infinity; // product.price < Infinity
 
   // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
@@ -58,13 +65,18 @@ app.get("/category/:slug", async (req, res) => {
 
   // Obtenemos todos los productos que tengan la categoria encontrada
   const productsFilter = products.filter(
-    (product) => product.categoryId === categoryFind.id,
+    (product) =>
+      product.categoryId === categoryFind.id &&
+      product.price / 100 >= minPrice &&
+      product.price / 100 <= maxPrice,
   );
 
   res.render("category", {
     namePage: categoryFind.name,
     category: categoryFind,
     products: productsFilter,
+    minPrice: minPriceQuery || "",
+    maxPrice: maxPriceQuery || "",
   });
 });
 

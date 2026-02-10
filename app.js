@@ -2,6 +2,7 @@ import express from "express";
 import expressLayouts from "express-ejs-layouts";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { parsePriceToCents } from "./utils.js";
 
 // Puerto de escucha de peticiones
 const PORT = 3000;
@@ -28,7 +29,9 @@ const DATA_PATH = path.join("data", "data.json"); // "./data/data.json"
 
 // Rutas
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", {
+    namePage: "Inicio",
+  });
 });
 
 app.get("/category/:slug", async (req, res) => {
@@ -37,22 +40,33 @@ app.get("/category/:slug", async (req, res) => {
 
   console.log({ minPriceQuery, maxPriceQuery });
 
-  // Validar los queries Strings
-  const minPrice = minPriceQuery ? Number(minPriceQuery) : -Infinity; // product.price > -Infinity
-  const maxPrice = maxPriceQuery ? Number(maxPriceQuery) : Infinity; // product.price < Infinity
+  const minPriceInCents = parsePriceToCents(minPriceQuery);
+  const maxPriceInCents = parsePriceToCents(maxPriceQuery);
 
-  // Leer mi archivo data.json
+  let minPrice = minPriceInCents ?? -Infinity;
+  let maxPrice = maxPriceInCents ?? Infinity;
+
+  let priceRangeError = null;
+
+  if (
+    minPriceInCents !== null &&
+    maxPriceInCents !== null &&
+    maxPriceInCents < minPriceInCents
+  ) {
+    minPrice = -Infinity;
+    maxPrice = Infinity;
+    priceRangeError =
+      "El precio máximo no puede ser menor que el precio mínimo. Mostrando todos los productos.";
+  }
+
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
 
-  // Convertir el json a objeto
   const data = JSON.parse(dataJson);
 
-  // Desestructuramos el data en categories y products
   const { categories, products } = data;
 
-  // Obtenemos el id de la category que el usuario clickeo
   const categoryFind = categories.find(
-    (category) => category.slug.toLowerCase() === categorySlug.toLowerCase(), // tazas12345
+    (category) => category.slug.toLowerCase() === categorySlug.toLowerCase(),
   );
 
   if (!categoryFind) {
@@ -61,28 +75,26 @@ app.get("/category/:slug", async (req, res) => {
     });
   }
 
-  // Obtenemos todos los productos que tengan la categoria encontrada
   const productsFilter = products.filter(
     (product) =>
       product.categoryId === categoryFind.id &&
-      product.price / 100 >= minPrice &&
-      product.price / 100 <= maxPrice,
+      product.price >= minPrice &&
+      product.price <= maxPrice,
   );
 
   res.render("category", {
     namePage: categoryFind.name,
     category: categoryFind,
     products: productsFilter,
-    minPrice: minPriceQuery || "",
-    maxPrice: maxPriceQuery || "",
+    minPrice: minPriceInCents !== null ? minPriceInCents / 100 : "",
+    maxPrice: maxPriceInCents !== null ? maxPriceInCents / 100 : "",
+    priceRangeError: priceRangeError,
   });
 });
 
 app.get("/product/:id", async (req, res) => {
-  // Capturar el id del parámetro de ruta y convertirlo a número
   const productId = Number(req.params.id);
 
-  // Leer y parsear data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
   const data = JSON.parse(dataJson);
 
@@ -104,27 +116,39 @@ app.get("/product/:id", async (req, res) => {
 });
 
 app.get("/cart", (req, res) => {
-  res.render("cart");
+  res.render("cart", {
+    namePage: "Carrito",
+  });
 });
 
 app.get("/checkout", (req, res) => {
-  res.render("checkout");
+  res.render("checkout", {
+    namePage: "Checkout",
+  });
 });
 
 app.get("/order-confirmation", (req, res) => {
-  res.render("order-confirmation");
+  res.render("order-confirmation", {
+    namePage: "Confirmación de Orden",
+  });
 });
 
 app.get("/about", (req, res) => {
-  res.render("about");
+  res.render("about", {
+    namePage: "Nosotros",
+  });
 });
 
 app.get("/terms", (req, res) => {
-  res.render("terms");
+  res.render("terms", {
+    namePage: "Términos y Condiciones",
+  });
 });
 
 app.get("/privacy", (req, res) => {
-  res.render("privacy");
+  res.render("privacy", {
+    namePage: "Privacidad",
+  });
 });
 
 // Escuchamos peticiones del cliente.

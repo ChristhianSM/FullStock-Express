@@ -14,7 +14,7 @@
         <div class="cart__item-details">
           <div class="cart__item-header">
             <h2 class="cart__item-title"><%= item.product.name %></h2>
-            <form method="post" action="/cart/remove-product">
+            <form method="post" action="/cart/delete-item">
               <input type="hidden" name="productId" value="<%= item.product.id %>">
               <button
                 class="button button--sm-icon button--outline"
@@ -30,9 +30,10 @@
             <p class="cart__item-price">SubTotal: S/ <%= (item.subtotal).toFixed(2) %></p>
             
             <div class="cart__item-quantity">
-              <form method="post" action="/cart/update-quantity">
+              <form method="post" 
+              action="<%= item.quantity === 1 ? '/cart/delete-item' : '/cart/update-item' %>">
                 <input type="hidden" name="productId" value="<%= item.product.id %>">
-                <input type="hidden" name="action" value="decrease">
+                <input type="hidden" name="quantity" value="<%= item.quantity - 1 %>">
                 <button
                   class="button button--sm-icon button--outline"
                   aria-label="Reducir cantidad"
@@ -42,9 +43,9 @@
                 </button>
               </form>
               <span class="cart__item-quantity-display"><%= item.quantity %></span>
-              <form method="post" action="/cart/update-quantity">
+              <form method="post" action="/cart/update-item">
                 <input type="hidden" name="productId" value="<%= item.product.id %>">
-                <input type="hidden" name="action" value="increase">
+                <input type="hidden" name="quantity" value="<%= item.quantity + 1 %>">
                 <button
                   class="button button--sm-icon button--outline"
                   aria-label="Aumentar cantidad"

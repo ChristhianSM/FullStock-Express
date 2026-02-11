@@ -228,6 +228,48 @@ app.get("/cart",async (req, res) => {
     total: total,
   });
 });
+//ruta para actualizar el carrito . editar cantidades
+app.post("/cart/update-item", async (req, res) => {
+  const { productId, quantity } = req.body;
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+  const { carts } = data;
+  const cart = carts[0] || { id: 1, items: [] };
+  // Buscamos el producto que el usuario desea actualizar en el carrito de compras
+  const cartItem = cart.items.find(
+    (product) => product.productId === parseInt(productId),
+  );
+  if (cartItem) {
+    cartItem.quantity = parseInt(quantity);
+  } 
+  // Guardar el carrito actualizado en mi objeto de carts
+  data.carts[0] = cart;
+
+  // Escribir data en archivo data.json
+  await fs.writeFile(DATA_PATH, JSON.stringify(data));
+
+  res.redirect("/cart");
+});
+//eliminar un producto del carrito
+app.post("/cart/delete-item", async (req, res) => {
+  const { productId } = req.body;
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+  const { carts } = data; 
+  const cart = carts[0] || { id: 1, items: [] };
+  // Filtramos el producto que deseamos eliminar del carrito de compras
+  cart.items = cart.items.filter((item) => item.productId !== parseInt(productId));
+  // Guardar el carrito actualizado en mi objeto de carts
+  data.carts[0] = cart;
+  // Escribir data en archivo data.json
+  await fs.writeFile(DATA_PATH, JSON.stringify(data));
+  res.redirect("/cart");
+});
+
 
 app.get("/checkout", (req, res) => {
   res.render("checkout");

@@ -198,8 +198,118 @@ app.post("/cart/add-product", async (req, res) => {
   res.redirect(`/product/${productId}`);
 });
 
-app.get("/cart", (req, res) => {
-  res.render("cart");
+app.get("/cart", async (req, res) => {
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  const { products, carts } = data;
+
+  // Obtener el primer carrito disponible
+  const cart = carts[0] || { id: 1, items: [] };
+
+  // Mapear los items del carrito para incluir la información completa del producto
+  const cartItems = cart.items.map((item) => {
+    const product = products.find((p) => p.id === item.productId);
+
+    if (!product) {
+      return {
+        productId: item.productId,
+        quantity: item.quantity,
+        name: "Producto no encontrado",
+        price: 0,
+        imgSrc: "",
+        subtotal: 0,
+      };
+    }
+
+    const priceSoles = product.price / 100; // convertir centavos a soles
+    const subtotal = priceSoles * item.quantity;
+
+    return {
+      productId: product.id,
+      quantity: item.quantity,
+      name: product.name,
+      price: priceSoles,
+      imgSrc: product.imgSrc,
+      subtotal,
+    };
+  });
+
+  // Calcular el total acumulado del carrito (en soles)
+  const total = cartItems.reduce((acc, item) => acc + item.subtotal, 0);
+
+  res.render("cart", {
+    cartItems,
+    total,
+  });
+});
+
+app.post("/cart/update-item", async (req, res) => {
+  const { productId, quantity } = req.body;
+
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  const { carts } = data;
+
+  // Obtener el primer carrito disponible
+  const cart = carts[0];
+
+  if (!cart) {
+    return res.redirect("/cart");
+  }
+
+  // Buscar el item correspondiente en el carrito
+  const cartItem = cart.items.find(
+    (item) => item.productId === Number(productId),
+  );
+
+  if (cartItem) {
+    // Actualizar su propiedad quantity con el nuevo valor
+    cartItem.quantity = Number(quantity);
+  }
+
+  // Persistir los cambios en data.json
+  await fs.writeFile(DATA_PATH, JSON.stringify(data, null, 2), "utf-8");
+
+  // Redirigir de vuelta a /cart
+  res.redirect("/cart");
+});
+
+app.post("/cart/delete-item", async (req, res) => {
+  const { productId } = req.body;
+
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  const { carts } = data;
+
+  // Obtener el primer carrito disponible
+  const cart = carts[0];
+
+  if (!cart) {
+    return res.redirect("/cart");
+  }
+
+  // Filtrar el arreglo de items para remover el que coincida con el ID
+  cart.items = cart.items.filter(
+    (item) => item.productId !== Number(productId),
+  );
+
+  // Guardar los cambios en el archivo
+  await fs.writeFile(DATA_PATH, JSON.stringify(data, null, 2), "utf-8");
+
+  // Redirigir al carrito
+  res.redirect("/cart");
 });
 
 app.get("/checkout", (req, res) => {

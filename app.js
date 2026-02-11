@@ -198,8 +198,35 @@ app.post("/cart/add-product", async (req, res) => {
   res.redirect(`/product/${productId}`);
 });
 
-app.get("/cart", (req, res) => {
-  res.render("cart");
+app.get("/cart",async (req, res) => {
+  //listamos los productos que estan en el carrito
+   // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  const { products, carts } = data;
+  const cart = carts[0] || { id: 1, items: [] };
+  //calcular el total del carrito
+  const cartItemsDetailed = cart.items.map((item) => {
+    const product = products.find((product) => product.id === item.productId);
+    //hallando subtotal de cada producto
+    const subtotal = (product.price * item.quantity) / 100;
+    return {
+      ...item,
+      product,
+      subtotal,
+    };
+  });
+  console.log(cartItemsDetailed);
+  //  calculando en total del carrito
+  const total = cartItemsDetailed.reduce((acumulador, item) => acumulador + item.subtotal, 0);
+  console.log(total);
+  res.render("cart", {
+    cartItems: cartItemsDetailed,
+    total: total,
+  });
 });
 
 app.get("/checkout", (req, res) => {

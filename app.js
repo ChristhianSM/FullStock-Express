@@ -198,8 +198,92 @@ app.post("/cart/add-product", async (req, res) => {
   res.redirect(`/product/${productId}`);
 });
 
-app.get("/cart", (req, res) => {
-  res.render("cart");
+app.get("/cart", async (req, res) => {
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  const { carts, products } = data;
+
+  const cart = carts[0];
+
+  const rawItems = cart ? cart.items : [];
+
+  // Crear un nuevo objeto { product, quantity, productId } y omitir si el producto no existe
+  const cartItems = rawItems
+    .map((item) => {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product) return null;
+      return { product, quantity: item.quantity, productId: item.productId };
+    })
+    .filter(Boolean);
+
+  const totalCents = cartItems.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0,
+  );
+
+  res.render("cart", {
+    cartItems,
+    totalCents,
+  });
+});
+
+app.post("/cart/update-item", async (req, res) => {
+  const { productId, quantity } = req.body;
+
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  const cart = data.carts?.[0];
+  if (!cart) {
+    return res.redirect("/cart");
+  }
+
+  const productIdNum = parseInt(productId);
+  const quantityNum = parseInt(quantity);
+
+  // Buscamos el producto al cual el usuario quiere cambiar su cantidad
+  const item = cart.items.find((i) => i.productId === productIdNum);
+  if (!item || quantityNum < 1) {
+    return res.redirect("/cart");
+  }
+
+  // Modificamos la cantidad del producto
+  item.quantity = quantityNum;
+
+  await fs.writeFile(DATA_PATH, JSON.stringify(data));
+
+  res.redirect("/cart");
+});
+
+app.post("/cart/delete-item", async (req, res) => {
+  const { productId } = req.body;
+
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  const cart = data.carts?.[0];
+  if (!cart) {
+    return res.redirect("/cart");
+  }
+
+  const productIdNum = parseInt(productId);
+
+  // Quitamos del carrito el item cuyo productId coincide
+  cart.items = cart.items.filter((i) => i.productId !== productIdNum);
+
+  await fs.writeFile(DATA_PATH, JSON.stringify(data));
+
+  res.redirect("/cart");
 });
 
 app.get("/checkout", (req, res) => {

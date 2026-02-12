@@ -53,6 +53,17 @@ app.use(async (req, res, next) => {
 // Path de mi data.json
 const DATA_PATH = path.join("data", "data.json"); // "./data/data.json"
 
+// Funcion para obtener la data
+async function getDataJson() {
+  // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  return data;
+}
+
 // Rutas
 app.get("/", (req, res) => {
   res.render("index");
@@ -73,10 +84,7 @@ app.get("/category/:slug", async (req, res) => {
   const maxPrice = parsePriceToCents(maxPriceQuery) ? maxPriceQuery : Infinity; // product.price < Infinity
 
   // Leer mi archivo data.json
-  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
-
-  // Convertir el json a objeto
-  const data = JSON.parse(dataJson);
+  const data = await getDataJson();
 
   // Desestructuramos el data en categories y products
   const { categories, products } = data;
@@ -126,10 +134,7 @@ app.get("/product/:id", async (req, res) => {
   const { id } = req.params;
 
   // Leer mi archivo data.json
-  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
-
-  // Convertir el json a objeto
-  const data = JSON.parse(dataJson);
+  const data = await getDataJson();
 
   const { products } = data;
 
@@ -155,10 +160,7 @@ app.post("/cart/add-product", async (req, res) => {
   const { productId, pathProduct } = req.body;
 
   // Leer mi archivo data.json
-  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
-
-  // Convertir el json a objeto
-  const data = JSON.parse(dataJson);
+  const data = await getDataJson();
 
   const { products, carts } = data;
 
@@ -198,8 +200,84 @@ app.post("/cart/add-product", async (req, res) => {
   res.redirect(`/product/${productId}`);
 });
 
-app.get("/cart", (req, res) => {
-  res.render("cart");
+app.get("/cart", async (req, res) => {
+  // Leer mi archivo data.json
+  const data = await getDataJson();
+
+  const { products, carts } = data;
+
+  const cart = carts[0];
+
+  const cartItems = cart.items.map((item) => {
+    const productFinded = products.find(
+      (product) => product.id === item.productId,
+    );
+    return {
+      ...productFinded,
+      quantity: item.quantity,
+    };
+  });
+
+  const total = cartItems.reduce(
+    (total, item) => total + (item.price / 100) * item.quantity,
+    0,
+  );
+
+  res.render("cart", {
+    cartItems,
+    total,
+  });
+});
+
+app.post("/cart/update-item", async (req, res) => {
+  const { productId, action } = req.body;
+
+  // Leer mi archivo data.json
+  const data = await getDataJson();
+
+  const { carts } = data;
+
+  const cart = carts[0];
+
+  const itemsUpdated = cart.items.map((item) => {
+    if (item.productId === parseInt(productId)) {
+      return {
+        ...item,
+        quantity: action === "add" ? item.quantity + 1 : item.quantity - 1,
+      };
+    }
+    return item;
+  });
+
+  cart.items = itemsUpdated;
+
+  // Escribir en mi archivo data.json
+  await fs.writeFile(DATA_PATH, JSON.stringify(data));
+
+  res.redirect("/cart");
+});
+
+app.post("/cart/delete-item", async (req, res) => {
+  const { productId } = req.body;
+
+  // Leer mi archivo data.json
+  const data = await getDataJson();
+
+  const { carts } = data;
+
+  const cart = carts[0];
+
+  const itemsFiltered = cart.items.filter(
+    (item) => item.productId !== parseInt(productId),
+  );
+
+  // Guardar el carrito en mi objeto de carts
+  cart.items = itemsFiltered;
+
+  // Escribir en mi archivo data.json
+  await fs.writeFile(DATA_PATH, JSON.stringify(data));
+
+  res.redirect("/cart");
 });
 
 app.get("/checkout", (req, res) => {

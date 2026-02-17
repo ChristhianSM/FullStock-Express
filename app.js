@@ -3,6 +3,8 @@ import expressLayouts from "express-ejs-layouts";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { parsePriceToCents, validationsPrices } from "./utils/utils.js";
+import { AppError } from "./utils/errorUtils.js";
+import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
 
 // Puerto de escucha de peticiones
 const PORT = 3000;
@@ -54,7 +56,7 @@ app.use(async (req, res, next) => {
 const DATA_PATH = path.join("data", "data.json"); // "./data/data.json"
 
 // Rutas
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.render("index");
 });
 
@@ -87,22 +89,15 @@ app.get("/category/:slug", async (req, res) => {
   );
 
   if (!categoryFind) {
-    return res.status(404).render("404", {
-      namePage: "Error categoría",
-      title: "Página no encontrada",
-      message: "Categoria no encontrada",
-      path: "/",
-    });
+    throw new AppError(
+      "La categoría que esta buscando no se encuentra disponible",
+      404,
+    );
   }
 
   const validations = validationsPrices(minPriceQuery, maxPriceQuery);
   if (error && validations.title) {
-    return res.render("404", {
-      namePage: "Error categoría",
-      title: validations.title,
-      message: validations.message,
-      path: req.path,
-    });
+    throw new AppError(validations.message, 404);
   }
 
   // Obtenemos todos los productos que tengan la categoria encontrada
@@ -137,12 +132,7 @@ app.get("/product/:id", async (req, res) => {
   const productFinded = products.find((product) => product.id === parseInt(id));
 
   if (!productFinded) {
-    return res.status(404).render("404", {
-      namePage: "Error",
-      title: "Página no encontrada",
-      message: "Producto no encontrado",
-      path: "/",
-    });
+    throw new AppError("Producto no encontrado", 404);
   }
 
   res.render("product", {
@@ -152,7 +142,7 @@ app.get("/product/:id", async (req, res) => {
 });
 
 app.post("/cart/add-product", async (req, res) => {
-  const { productId, pathProduct } = req.body;
+  const { productId } = req.body;
 
   // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
@@ -168,12 +158,10 @@ app.post("/cart/add-product", async (req, res) => {
   );
 
   if (!productFinded) {
-    return res.status(404).render("404", {
-      namePage: "Error",
-      title: "Producto no encontrado",
-      message: "El producto seleccionado no se encuentra disponible",
-      path: pathProduct,
-    });
+    throw new AppError(
+      "El producto seleccionado no se encuentra disponible",
+      404,
+    );
   }
 
   const cart = carts[0] || { id: 1, items: [] };
@@ -198,8 +186,7 @@ app.post("/cart/add-product", async (req, res) => {
   res.redirect(`/product/${productId}`);
 });
 
-app.get("/cart",async (req, res) => {
-  
+app.get("/cart", async (req, res) => {
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
 
   // Convertir el json a objeto
@@ -207,20 +194,27 @@ app.get("/cart",async (req, res) => {
 
   const { products, carts } = data;
   const cart = carts[0] || { id: 1, items: [] };
+
   //calcular el total del carrito
   const cartItemsDetailed = cart.items.map((item) => {
     const product = products.find((product) => product.id === item.productId);
+
     //hallando subtotal de cada producto
     const subtotal = (product.price * item.quantity) / 100;
+
     return {
       ...item,
       product,
       subtotal,
     };
   });
+
   //  calculando en total del carrito
-  const total = cartItemsDetailed.reduce((acumulador, item) => acumulador + item.subtotal, 0);
-  console.log(total);
+  const total = cartItemsDetailed.reduce(
+    (acumulador, item) => acumulador + item.subtotal,
+    0,
+  );
+
   res.render("cart", {
     cartItems: cartItemsDetailed,
     total: total,
@@ -239,7 +233,7 @@ app.post("/cart/update-item", async (req, res) => {
   );
   if (cartItem) {
     cartItem.quantity = parseInt(quantity);
-  } 
+  }
   data.carts[0] = cart;
 
   await fs.writeFile(DATA_PATH, JSON.stringify(data));
@@ -249,41 +243,56 @@ app.post("/cart/update-item", async (req, res) => {
 //eliminar un producto del carrito
 app.post("/cart/delete-item", async (req, res) => {
   const { productId } = req.body;
+
   // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
   // Convertir el json a objeto
   const data = JSON.parse(dataJson);
-  const { carts } = data; 
+
+  const { carts } = data;
+
   const cart = carts[0] || { id: 1, items: [] };
+
   // Filtramos el producto que deseamos eliminar del carrito de compras
-  cart.items = cart.items.filter((item) => item.productId !== parseInt(productId));
+  cart.items = cart.items.filter(
+    (item) => item.productId !== parseInt(productId),
+  );
+
   // Guardar el carrito actualizado en mi objeto de carts
   data.carts[0] = cart;
+
   // Escribir data en archivo data.json
   await fs.writeFile(DATA_PATH, JSON.stringify(data));
+
   res.redirect("/cart");
 });
 
-
-app.get("/checkout", (req, res) => {
+app.get("/checkout", (_req, res) => {
   res.render("checkout");
 });
 
-app.get("/order-confirmation", (req, res) => {
+app.get("/order-confirmation", (_req, res) => {
   res.render("order-confirmation");
 });
 
-app.get("/about", (req, res) => {
+app.get("/about", (_req, res) => {
   res.render("about");
 });
 
-app.get("/terms", (req, res) => {
+app.get("/terms", (_req, res) => {
   res.render("terms");
 });
 
-app.get("/privacy", (req, res) => {
+app.get("/privacy", (_req, res) => {
   res.render("privacy");
 });
+
+// Handler para manejar rutas desconocidas
+app.use(notFoundHandler);
+
+// Handler para manejar errores
+app.use(errorHandler);
 
 // Escuchamos peticiones del cliente.
 app.listen(PORT, () => {

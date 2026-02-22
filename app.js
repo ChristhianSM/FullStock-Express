@@ -3,6 +3,8 @@ import expressLayouts from "express-ejs-layouts";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { parsePriceToCents, validationsPrices } from "./utils/utils.js";
+import { AppError } from "./utils/errorUtils.js";
+import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
 
 // Puerto de escucha de peticiones
 const PORT = 3000;
@@ -54,7 +56,7 @@ app.use(async (req, res, next) => {
 const DATA_PATH = path.join("data", "data.json"); // "./data/data.json"
 
 // Rutas
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.render("index");
 });
 
@@ -87,22 +89,15 @@ app.get("/category/:slug", async (req, res) => {
   );
 
   if (!categoryFind) {
-    return res.status(404).render("404", {
-      namePage: "Error categoría",
-      title: "Página no encontrada",
-      message: "Categoria no encontrada",
-      path: "/",
-    });
+    throw new AppError(
+      "La categoría que esta buscando no se encuentra disponible",
+      404,
+    );
   }
 
   const validations = validationsPrices(minPriceQuery, maxPriceQuery);
   if (error && validations.title) {
-    return res.render("404", {
-      namePage: "Error categoría",
-      title: validations.title,
-      message: validations.message,
-      path: req.path,
-    });
+    throw new AppError(validations.message, 404);
   }
 
   // Obtenemos todos los productos que tengan la categoria encontrada
@@ -137,12 +132,7 @@ app.get("/product/:id", async (req, res) => {
   const productFinded = products.find((product) => product.id === parseInt(id));
 
   if (!productFinded) {
-    return res.status(404).render("404", {
-      namePage: "Error",
-      title: "Página no encontrada",
-      message: "Producto no encontrado",
-      path: "/",
-    });
+    throw new AppError("Producto no encontrado", 404);
   }
 
   res.render("product", {
@@ -152,7 +142,7 @@ app.get("/product/:id", async (req, res) => {
 });
 
 app.post("/cart/add-product", async (req, res) => {
-  const { productId, pathProduct } = req.body;
+  const { productId } = req.body;
 
   // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
@@ -168,12 +158,10 @@ app.post("/cart/add-product", async (req, res) => {
   );
 
   if (!productFinded) {
-    return res.status(404).render("404", {
-      namePage: "Error",
-      title: "Producto no encontrado",
-      message: "El producto seleccionado no se encuentra disponible",
-      path: pathProduct,
-    });
+    throw new AppError(
+      "El producto seleccionado no se encuentra disponible",
+      404,
+    );
   }
 
   const cart = carts[0] || { id: 1, items: [] };
@@ -199,89 +187,60 @@ app.post("/cart/add-product", async (req, res) => {
 });
 
 app.get("/cart", async (req, res) => {
-  // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
 
   // Convertir el json a objeto
   const data = JSON.parse(dataJson);
 
   const { products, carts } = data;
-
-  // Obtener el primer carrito disponible
   const cart = carts[0] || { id: 1, items: [] };
 
-  // Mapear los items del carrito para incluir la información completa del producto
-  const cartItems = cart.items.map((item) => {
-    const product = products.find((p) => p.id === item.productId);
+  //calcular el total del carrito
+  const cartItemsDetailed = cart.items.map((item) => {
+    const product = products.find((product) => product.id === item.productId);
 
-    if (!product) {
-      return {
-        productId: item.productId,
-        quantity: item.quantity,
-        name: "Producto no encontrado",
-        price: 0,
-        imgSrc: "",
-        subtotal: 0,
-      };
-    }
-
-    const priceSoles = product.price / 100; // convertir centavos a soles
-    const subtotal = priceSoles * item.quantity;
+    //hallando subtotal de cada producto
+    const subtotal = (product.price * item.quantity) / 100;
 
     return {
-      productId: product.id,
-      quantity: item.quantity,
-      name: product.name,
-      price: priceSoles,
-      imgSrc: product.imgSrc,
+      ...item,
+      product,
       subtotal,
     };
   });
 
-  // Calcular el total acumulado del carrito (en soles)
-  const total = cartItems.reduce((acc, item) => acc + item.subtotal, 0);
+  //  calculando en total del carrito
+  const total = cartItemsDetailed.reduce(
+    (acumulador, item) => acumulador + item.subtotal,
+    0,
+  );
 
   res.render("cart", {
-    cartItems,
-    total,
+    cartItems: cartItemsDetailed,
+    total: total,
   });
 });
 
 app.post("/cart/update-item", async (req, res) => {
   const { productId, quantity } = req.body;
-
-  // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
-
-  // Convertir el json a objeto
   const data = JSON.parse(dataJson);
-
   const { carts } = data;
+  const cart = carts[0] || { id: 1, items: [] };
 
-  // Obtener el primer carrito disponible
-  const cart = carts[0];
-
-  if (!cart) {
-    return res.redirect("/cart");
-  }
-
-  // Buscar el item correspondiente en el carrito
   const cartItem = cart.items.find(
-    (item) => item.productId === Number(productId),
+    (product) => product.productId === parseInt(productId),
   );
-
   if (cartItem) {
-    // Actualizar su propiedad quantity con el nuevo valor
-    cartItem.quantity = Number(quantity);
+    cartItem.quantity = parseInt(quantity);
   }
+  data.carts[0] = cart;
 
-  // Persistir los cambios en data.json
-  await fs.writeFile(DATA_PATH, JSON.stringify(data, null, 2), "utf-8");
+  await fs.writeFile(DATA_PATH, JSON.stringify(data));
 
-  // Redirigir de vuelta a /cart
   res.redirect("/cart");
 });
-
+//eliminar un producto del carrito
 app.post("/cart/delete-item", async (req, res) => {
   const { productId } = req.body;
 
@@ -293,44 +252,47 @@ app.post("/cart/delete-item", async (req, res) => {
 
   const { carts } = data;
 
-  // Obtener el primer carrito disponible
-  const cart = carts[0];
+  const cart = carts[0] || { id: 1, items: [] };
 
-  if (!cart) {
-    return res.redirect("/cart");
-  }
-
-  // Filtrar el arreglo de items para remover el que coincida con el ID
+  // Filtramos el producto que deseamos eliminar del carrito de compras
   cart.items = cart.items.filter(
-    (item) => item.productId !== Number(productId),
+    (item) => item.productId !== parseInt(productId),
   );
 
-  // Guardar los cambios en el archivo
-  await fs.writeFile(DATA_PATH, JSON.stringify(data, null, 2), "utf-8");
+  // Guardar el carrito actualizado en mi objeto de carts
+  data.carts[0] = cart;
 
-  // Redirigir al carrito
+  // Escribir data en archivo data.json
+  await fs.writeFile(DATA_PATH, JSON.stringify(data));
+
   res.redirect("/cart");
 });
 
-app.get("/checkout", (req, res) => {
+app.get("/checkout", (_req, res) => {
   res.render("checkout");
 });
 
-app.get("/order-confirmation", (req, res) => {
+app.get("/order-confirmation", (_req, res) => {
   res.render("order-confirmation");
 });
 
-app.get("/about", (req, res) => {
+app.get("/about", (_req, res) => {
   res.render("about");
 });
 
-app.get("/terms", (req, res) => {
+app.get("/terms", (_req, res) => {
   res.render("terms");
 });
 
-app.get("/privacy", (req, res) => {
+app.get("/privacy", (_req, res) => {
   res.render("privacy");
 });
+
+// Handler para manejar rutas desconocidas
+app.use(notFoundHandler);
+
+// Handler para manejar errores
+app.use(errorHandler);
 
 // Escuchamos peticiones del cliente.
 app.listen(PORT, () => {

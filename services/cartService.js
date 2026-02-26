@@ -77,3 +77,13 @@ export async function deleteItemToCart(productId) {
 
   return cart;
 }
+
+export async function clearCart() {
+  const cart = await cartRepository.find();
+
+  if (!cart) return;
+
+  cart.items = [];
+
+  await cartRepository.update(cart);
+}

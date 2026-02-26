@@ -4,55 +4,36 @@
       <div class="checkout__summary">
         <h2 class="checkout__summary_title">Resumen de la orden</h2>
         <div class="checkout__summary_container">
+          <% for(const item of cartItems) { %>
           <div class="checkout__item">
             <div class="checkout__item-image">
               <img
-                src="/images/polos/polo-react.png"
-                alt="Polo React"
+                src="<%= item.product.imgSrc %>"
+                alt="<%= item.product.name %>"
                 class="checkout__item-image-content"
               />
             </div>
             <div class="checkout__item-details">
-              <h3 class="checkout__item-title">Polo React</h3>
+              <h3 class="checkout__item-title"><%= item.product.name %></h3>
               <div class="checkout__item-price">
-                <p>2</p>
+                <p><%= item.quantity %></p>
                 <img
                   src="/images/icons/x.svg"
                   alt=""
                   class="checkout__item-price-icon"
                 />
-                <p>S/ 20</p>
+                <p>S/ <%= (item.product.price / 100).toFixed(2) %></p>
               </div>
             </div>
           </div>
-          <div class="checkout__item">
-            <div class="checkout__item-image">
-              <img
-                src="/images/tazas/taza-github.png"
-                alt="Taza GitHub"
-                class="checkout__item-image-content"
-              />
-            </div>
-            <div class="checkout__item-details">
-              <h3 class="checkout__item-title">Taza GitHub</h3>
-              <div class="checkout__item-price">
-                <p>1</p>
-                <img
-                  src="/images/icons/x.svg"
-                  alt=""
-                  class="checkout__item-price-icon"
-                />
-                <p>S/ 14.99</p>
-              </div>
-            </div>
-          </div>
+          <% } %>
           <div class="checkout__total">
             <p>Total</p>
-            <p>S/ 54.99</p>
+            <p><%= total.toFixed(2) %></p>
           </div>
         </div>
       </div>
-      <form class="checkout__form" action="/order-confirmation">
+      <form class="checkout__form" action="/checkout/place-order" method="post">
         <legend class="checkout__legend">Información de contacto</legend>
         <div class="input-field">
           <label for="email">Correo electrónico</label>

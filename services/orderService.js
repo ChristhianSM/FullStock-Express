@@ -1,7 +1,7 @@
 import * as cartService from "./cartService.js";
 import * as orderRepository from "../repositories/orderRepository.js";
 
-export async function processCheckout(shippingInfo, cart) {
+export async function processCheckout(cardId, shippingInfo, cart) {
   const orderItems = cart.items.map((item) => {
     return {
       productId: item.productId,
@@ -20,7 +20,7 @@ export async function processCheckout(shippingInfo, cart) {
 
   const newOrder = await orderRepository.create(order);
 
-  await cartService.clearCart();
+  await cartService.clearCart(cardId);
 
   return newOrder;
 }

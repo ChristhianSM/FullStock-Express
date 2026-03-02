@@ -1,4 +1,4 @@
-import { getData } from "../data/db.js";
+import { find } from "../repositories/cartRepository.js";
 
 // Middleware para definir el título de la página (namePage) en todas las vistas
 const pageTitleByPath = {
@@ -13,17 +13,15 @@ const pageTitleByPath = {
 
 export async function globalHandler(req, res, next) {
   const path = req.path;
+  const cartId = req.cartId;
   res.locals.namePage = pageTitleByPath[path] || "Full Stock";
 
-  // Leer mi archivo data.json
-  const data = await getData();
+  // Leer mi cart de acuerdo a su id
+  const cartFinded = await find(cartId);
 
-  if (!data.carts) {
-    data.carts = [];
-  }
-
-  res.locals.countCartProducts = data.carts[0]
-    ? data.carts[0].items.reduce((total, item) => total + item.quantity, 0)
+  res.locals.countCartProducts = cartFinded
+    ? cartFinded.items.reduce((total, item) => total + item.quantity, 0)
     : 0;
+
   next();
 }

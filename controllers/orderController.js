@@ -2,8 +2,9 @@ import * as cartService from "../services/cartService.js";
 import * as orderService from "../services/orderService.js";
 import { AppError } from "../utils/errorUtils.js";
 
-export async function renderCheckout(_req, res) {
-  const cart = (await cartService.getCart()) || { items: [], total: 0 };
+export async function renderCheckout(req, res) {
+  const cardId = req.cartId;
+  const cart = await cartService.getCart(cardId);
 
   res.render("checkout", {
     cartItems: cart.items,
@@ -12,9 +13,10 @@ export async function renderCheckout(_req, res) {
 }
 
 export async function placeOrder(req, res) {
+  const cardId = req.cartId;
   const shippingInfo = req.body;
 
-  const cart = await cartService.getCart();
+  const cart = await cartService.getCart(cardId);
 
   if (!cart || cart.items.length === 0) {
     throw new AppError(
@@ -23,7 +25,7 @@ export async function placeOrder(req, res) {
     );
   }
 
-  const order = await orderService.processCheckout(shippingInfo, cart);
+  const order = await orderService.processCheckout(cardId, shippingInfo, cart);
   const orderId = order.id;
 
   res.redirect(`/order-confirmation?orderId=${orderId}`);

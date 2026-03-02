@@ -1,8 +1,8 @@
 import * as cartRepository from "../repositories/cartRepository.js";
 import * as productRepository from "../repositories/productRepository.js";
 
-export async function getCart() {
-  const cart = (await cartRepository.find()) || { id: 1, items: [] };
+export async function getCart(cartId) {
+  const cart = (await cartRepository.find(cartId)) || { id: 1, items: [] };
 
   const products = await productRepository.findAll();
 
@@ -32,8 +32,25 @@ export async function getCart() {
   };
 }
 
-export async function addItemToCart(productId) {
-  const cart = (await cartRepository.find()) || { id: 1, items: [] };
+// Modifica addItemToCart(cartId, productId):
+
+// Primero, intenta buscar el carrito con cartRepository.find(cartId).
+// Si cart es null (no existe o cartId era undefined), crea uno nuevo usando cartRepository.create().
+// Procede a agregar el producto al carrito encontrado (o recién creado).
+// Retorna el carrito actualizado.
+
+export async function addItemToCart(cartId, productId) {
+  const cart = await cartRepository.find(cartId);
+
+  if (!cart) {
+    const newCart = await cartRepository.create();
+
+    newCart.items.push({ productId, quantity: 1 });
+
+    const updateCart = await cartRepository.update(newCart);
+
+    return updateCart;
+  }
 
   // Buscamos el producto que el usuario agrego al carrito de compras
   const cartItem = cart.items.find(
@@ -51,8 +68,8 @@ export async function addItemToCart(productId) {
   return updateCart;
 }
 
-export async function updateItemToCart(productId, quantity) {
-  const cart = (await cartRepository.find()) || { id: 1, items: [] };
+export async function updateItemToCart(cartId, productId, quantity) {
+  const cart = await cartRepository.find(cartId);
 
   const cartItem = cart.items.find(
     (product) => product.productId === productId,
@@ -67,8 +84,8 @@ export async function updateItemToCart(productId, quantity) {
   return updateCart;
 }
 
-export async function deleteItemToCart(productId) {
-  const cart = (await cartRepository.find()) || { id: 1, items: [] };
+export async function deleteItemToCart(cartId, productId) {
+  const cart = await cartRepository.find(cartId);
 
   // Filtramos el producto que deseamos eliminar del carrito de compras
   cart.items = cart.items.filter((item) => item.productId !== productId);
@@ -78,8 +95,8 @@ export async function deleteItemToCart(productId) {
   return cart;
 }
 
-export async function clearCart() {
-  const cart = await cartRepository.find();
+export async function clearCart(cartId) {
+  const cart = await cartRepository.find(cartId);
 
   if (!cart) return;
 

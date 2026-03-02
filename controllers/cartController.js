@@ -2,8 +2,9 @@ import * as cartService from "../services/cartService.js";
 import * as productService from "../services/productService.js";
 import { AppError } from "../utils/errorUtils.js";
 
-export async function renderCart(_req, res) {
-  const { items, total } = await cartService.getCart();
+export async function renderCart(req, res) {
+  const cartId = req.cartId;
+  const { items, total } = await cartService.getCart(cartId);
 
   res.render("cart", {
     cartItems: items,
@@ -12,6 +13,7 @@ export async function renderCart(_req, res) {
 }
 
 export async function addItemToCart(req, res) {
+  const cartId = req.cartId; // 4
   const productId = parseInt(req.body.productId);
 
   const productFinded = await productService.getProductById(productId);
@@ -23,12 +25,21 @@ export async function addItemToCart(req, res) {
     );
   }
 
-  await cartService.addItemToCart(productId);
+  const cart = await cartService.addItemToCart(cartId, productId);
+
+  if (!cartId || cartId !== cart.id) {
+    res.cookie("cartId", cart.id, {
+      signed: true,
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+  }
 
   res.redirect(`/product/${productId}`);
 }
 
 export async function updateItemToCart(req, res) {
+  const cartId = req.cartId;
   const productId = parseInt(req.body.productId);
   const quantity = parseInt(req.body.quantity);
 
@@ -45,11 +56,12 @@ export async function updateItemToCart(req, res) {
     throw new AppError("La cantidad Ingresada es incorrecta", 400);
   }
 
-  await cartService.updateItemToCart(productId, quantity);
+  await cartService.updateItemToCart(cartId, productId, quantity);
   res.redirect("/cart");
 }
 
 export async function deleteItemToCart(req, res) {
+  const cartId = req.cartId;
   const productId = parseInt(req.body.productId);
 
   const productFinded = await productService.getProductById(productId);
@@ -61,6 +73,6 @@ export async function deleteItemToCart(req, res) {
     );
   }
 
-  await cartService.deleteItemToCart(productId);
+  await cartService.deleteItemToCart(cartId, productId);
   res.redirect("/cart");
 }

@@ -6,6 +6,7 @@ import { globalHandler } from "./middlewares/globalHandler.js";
 import routesStatic from "./routes/routesStatic.js";
 import routesDynamic from "./routes/routesDynamic.js";
 import routesCart from "./routes/routesCart.js";
+import routesAuth from "./routes/routesAuth.js";
 import { cartContext } from "./middlewares/cartContext.js";
 
 // Puerto de escucha de peticiones
@@ -38,6 +39,7 @@ app.use(globalHandler);
 app.use(routesStatic);
 app.use(routesDynamic);
 app.use("/cart", routesCart);
+app.use("/auth", routesAuth);
 
 // Handler para manejar rutas desconocidas
 app.use(notFoundHandler);

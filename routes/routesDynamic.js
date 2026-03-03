@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as productController from "../controllers/productController.js";
 import * as orderController from "../controllers/orderController.js";
+import * as authController from "../controllers/authController.js";
 
 const router = Router();
 

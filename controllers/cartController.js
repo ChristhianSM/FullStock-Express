@@ -1,5 +1,6 @@
 import * as cartService from "../services/cartService.js";
 import * as productService from "../services/productService.js";
+import { setCookie } from "../utils/cookiesUtils.js";
 import { AppError } from "../utils/errorUtils.js";
 
 export async function renderCart(req, res) {
@@ -28,11 +29,7 @@ export async function addItemToCart(req, res) {
   const cart = await cartService.addItemToCart(cartId, productId);
 
   if (!cartId || cartId !== cart.id) {
-    res.cookie("cartId", cart.id, {
-      signed: true,
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setCookie(res, "cartId", cart.id, { signed: true });
   }
 
   res.redirect(`/product/${productId}`);

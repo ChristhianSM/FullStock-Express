@@ -1,6 +1,14 @@
 import { getData, saveData } from "../data/db.js";
 import { getNextId } from "../utils/db.js";
 
+export async function findById(id) {
+  const data = await getData();
+
+  const user = data.users.find((user) => user.id === id);
+
+  return user || null;
+}
+
 export async function findByEmail(email) {
   const data = await getData();
 

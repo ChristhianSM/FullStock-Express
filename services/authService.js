@@ -23,3 +23,20 @@ export async function signup(email, password, confirmPassword) {
 
   return await userService.createUser(newUser);
 }
+
+export async function login(email, password) {
+  const user = await userService.getUserByEmail(email);
+
+  if (!user) {
+    throw new AppError("Credenciales no validas", 400);
+  }
+
+  // Comparamos contraseñas
+  const isPasswordValid = await bcryptjs.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new AppError("Credenciales no validas", 400);
+  }
+
+  return user;
+}

@@ -8,6 +8,7 @@ import routesDynamic from "./routes/routesDynamic.js";
 import routesCart from "./routes/routesCart.js";
 import routesAuth from "./routes/routesAuth.js";
 import { cartContext } from "./middlewares/cartContext.js";
+import { authContext } from "./middlewares/authContext.js";
 
 // Puerto de escucha de peticiones
 const PORT = 3000;
@@ -33,13 +34,14 @@ app.use(expressLayouts);
 app.set("layout", "layout");
 
 app.use(cartContext);
+app.use(authContext);
 app.use(globalHandler);
 
 // Rutas
 app.use(routesStatic);
 app.use(routesDynamic);
 app.use("/cart", routesCart);
-app.use("/auth", routesAuth);
+app.use("/auth", routesAuth); // /auth/signup, /auth/login
 
 // Handler para manejar rutas desconocidas
 app.use(notFoundHandler);

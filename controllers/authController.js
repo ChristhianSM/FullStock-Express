@@ -17,7 +17,9 @@ export async function handleSignup(req, res) {
   const email = emailBody.toLowerCase();
 
   try {
-    await authService.signup(email, password, confirmPassword);
+    const newUser = await authService.signup(email, password, confirmPassword);
+
+    setCookie(res, "userId", newUser.id);
 
     res.redirect("/");
   } catch (error) {
@@ -45,7 +47,7 @@ export async function handleLogin(req, res) {
   try {
     const user = await authService.login(email, password);
 
-    setCookie(res, "userId", user.id);
+    setCookie(res, "userId", user.id, { signed: true });
 
     res.redirect("/");
   } catch (error) {

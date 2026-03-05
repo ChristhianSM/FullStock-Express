@@ -5,8 +5,10 @@ export async function authContext(req, res, next) {
   req.user = null;
   res.locals.user = null;
 
-  const userId = parseInt(req.cookies.userId);
+  const userId = parseInt(req.signedCookies.userId);
+
   if (!userId) {
+    clearCookie(res, "userId");
     return next();
   }
 

@@ -20,7 +20,7 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 
 // Middleware para manejo de cookies
-app.use(cookieParser("MI_CODIGO_SECRETO"));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // Middleware para archivos estaticos
 app.use(express.static("public"));

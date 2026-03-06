@@ -15,6 +15,7 @@ export async function renderCart(req, res) {
 
 export async function addItemToCart(req, res) {
   const cartId = req.cartId; // 4
+  const userId = req.user?.id;
   const productId = parseInt(req.body.productId);
 
   const productFinded = await productService.getProductById(productId);
@@ -26,7 +27,7 @@ export async function addItemToCart(req, res) {
     );
   }
 
-  const cart = await cartService.addItemToCart(cartId, productId);
+  const cart = await cartService.addItemToCart(cartId, productId, userId);
 
   if (!cartId || cartId !== cart.id) {
     setCookie(res, "cartId", cart.id, { signed: true });

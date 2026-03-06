@@ -33,8 +33,8 @@ app.set("views", "./views");
 app.use(expressLayouts);
 app.set("layout", "layout");
 
-app.use(cartContext);
 app.use(authContext);
+app.use(cartContext);
 app.use(globalHandler);
 
 // Rutas

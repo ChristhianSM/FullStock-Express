@@ -32,6 +32,16 @@ export async function getCart(cartId) {
   };
 }
 
+export async function getCartById(id) {
+  const cart = await cartRepository.find(id);
+  return cart;
+}
+
+export async function getCartByUserId(userId) {
+  const cart = await cartRepository.findByUserId(userId);
+  return cart;
+}
+
 // Modifica addItemToCart(cartId, productId):
 
 // Primero, intenta buscar el carrito con cartRepository.find(cartId).
@@ -39,18 +49,33 @@ export async function getCart(cartId) {
 // Procede a agregar el producto al carrito encontrado (o recién creado).
 // Retorna el carrito actualizado.
 
-export async function addItemToCart(cartId, productId) {
-  const cart = await cartRepository.find(cartId);
+// function para buscar el carrito dependiendo si es por id o por userId
+export async function getOrCreateCart(cartId, userId = null) {
+  let cart; // undefined
 
-  if (!cart) {
-    const newCart = await cartRepository.create();
+  // cartId = null;
+  // userId = 1;
 
-    newCart.items.push({ productId, quantity: 1 });
-
-    const updateCart = await cartRepository.update(newCart);
-
-    return updateCart;
+  // cuando existe un cartId
+  if (cartId) {
+    cart = await cartRepository.find(cartId);
   }
+
+  // Cuando no encontro cart por el cartId, Pero el usuario esta logueado
+  if (!cart && userId) {
+    cart = await cartRepository.findByUserId(userId);
+  }
+
+  // Cuando no tiene cartId, puede tener userId, CREAMOS UN CARRITO
+  if (!cart) {
+    cart = await cartRepository.create(userId);
+  }
+
+  return cart;
+}
+
+export async function addItemToCart(cartId, productId, userId = null) {
+  const cart = await getOrCreateCart(cartId, userId);
 
   // Buscamos el producto que el usuario agrego al carrito de compras
   const cartItem = cart.items.find(
@@ -103,4 +128,35 @@ export async function clearCart(cartId) {
   cart.items = [];
 
   await cartRepository.update(cart);
+}
+
+export async function mergeCarts(guestCartId, userId) {
+  const guestCart = await cartRepository.find(guestCartId);
+
+  if (!guestCart || guestCart.items.length === 0) return;
+
+  let userCart = await cartRepository.findByUserId(userId);
+
+  if (!userCart) {
+    userCart = await cartRepository.create(userId);
+  }
+
+  for (const guestItem of guestCart.items) {
+    // Hacemos una busqueda para verificar si el item del carrito huerfano se encuentra en mi carrito de usuario logueado
+    const existItem = userCart.items.find(
+      (userItem) => userItem.productId === guestItem.productId,
+    );
+
+    if (existItem) {
+      existItem.quantity += guestItem.quantity;
+    } else {
+      userCart.items.push(guestItem);
+    }
+  }
+
+  // Actualizamos nuestra data
+  await cartRepository.update(userCart);
+
+  // Eliminamos el carrito de invitado
+  await cartRepository.destroy(guestCartId);
 }

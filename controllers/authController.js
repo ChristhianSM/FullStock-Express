@@ -1,4 +1,5 @@
 import * as authService from "../services/authService.js";
+import * as cartService from "../services/cartService.js";
 import { clearCookie, setCookie } from "../utils/cookiesUtils.js";
 
 export async function renderSignup(req, res) {
@@ -19,7 +20,12 @@ export async function handleSignup(req, res) {
   try {
     const newUser = await authService.signup(email, password, confirmPassword);
 
-    setCookie(res, "userId", newUser.id);
+    setCookie(res, "userId", newUser.id, { signed: true });
+
+    // fusionamos el carrito de invitado con el carrito del usuario recien creado
+    if (req.cartId) {
+      await cartService.mergeCarts(req.cartId, newUser.id);
+    }
 
     res.redirect("/");
   } catch (error) {
@@ -48,6 +54,11 @@ export async function handleLogin(req, res) {
     const user = await authService.login(email, password);
 
     setCookie(res, "userId", user.id, { signed: true });
+
+    // fusionamos el carrito de invitado con el carrito del usuario logueado
+    if (req.cartId) {
+      await cartService.mergeCarts(req.cartId, user.id);
+    }
 
     res.redirect("/");
   } catch (error) {

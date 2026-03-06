@@ -1,6 +1,7 @@
 import { getData, saveData } from "../data/db.js";
 import { getNextId } from "../utils/db.js";
 
+// Buscar un carrito de invitado
 export async function find(id) {
   // id del carrito
   const data = await getData();
@@ -12,6 +13,17 @@ export async function find(id) {
   return data.carts.find((cart) => cart.id === id) || null;
 }
 
+// Buscar un carrito de usuario logueado
+export async function findByUserId(userId) {
+  const data = await getData();
+
+  if (!data.carts) {
+    data.carts = [];
+  }
+
+  return data.carts.find((cart) => cart.userId === userId);
+}
+
 // Crea una nueva función create() (sin argumentos). Esta función debe:
 
 // Obtener el siguiente ID disponible usando getNextId("carts").
@@ -20,13 +32,14 @@ export async function find(id) {
 // Guardar la base de datos.
 // Retornar el nuevo carrito.
 
-export async function create() {
+export async function create(userId = null) {
   const data = await getData();
 
   const nextId = await getNextId("carts");
 
   const newCart = {
     id: nextId,
+    userId,
     items: [],
   };
 
@@ -58,4 +71,16 @@ export async function update(cartData) {
   await saveData(data);
 
   return cartData;
+}
+
+export async function destroy(id) {
+  const data = await getData();
+
+  if (!data.carts) {
+    data.carts = [];
+  }
+
+  data.carts = data.carts.filter((cart) => cart.id !== id);
+
+  await saveData(data);
 }

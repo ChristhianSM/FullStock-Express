@@ -42,6 +42,8 @@
             name="email"
             type="email"
             autocomplete="email"
+            value="<%= user ? user.email : "" %>"
+            <%= user ? 'readonly': '' %>
             required
           />
         </div>

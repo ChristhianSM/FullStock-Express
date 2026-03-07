@@ -349,23 +349,247 @@
       ]
     }
   ],
-  "orders": [],
-  "carts": [
+  "orders": [
     {
       "id": 1,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 10,
+          "name": "Sticker JavaScript",
+          "price": 299,
+          "imgSrc": "/images/stickers/sticker-js.png",
+          "quantity": 5
+        },
+        {
+          "productId": 1,
+          "name": "Polo React",
+          "price": 2000,
+          "imgSrc": "/images/polos/polo-react.png",
+          "quantity": 5
+        },
+        {
+          "productId": 3,
+          "name": "Polo Node.js",
+          "price": 2000,
+          "imgSrc": "/images/polos/polo-node.png",
+          "quantity": 2
+        },
+        {
+          "productId": 18,
+          "name": "Taza JavaScript",
+          "price": 1499,
+          "imgSrc": "/images/tazas/taza-js.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "asdasd",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 169.94,
+      "status": "pending",
+      "createAt": "2026-03-07T01:27:07.701Z"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "items": [
+        {
+          "productId": 18,
+          "name": "Taza JavaScript",
+          "price": 1499,
+          "imgSrc": "/images/tazas/taza-js.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com1",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "asdasd",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 14.99,
+      "status": "pending",
+      "createAt": "2026-03-07T01:28:08.575Z"
+    },
+    {
+      "id": 3,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 3,
+          "name": "Polo Node.js",
+          "price": 2000,
+          "imgSrc": "/images/polos/polo-node.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 20,
+      "status": "pending",
+      "createAt": "2026-03-07T01:36:31.433Z"
+    },
+    {
+      "id": 4,
+      "userId": 2,
+      "items": [
+        {
+          "productId": 3,
+          "name": "Polo Node.js",
+          "price": 2000,
+          "imgSrc": "/images/polos/polo-node.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com1",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 20,
+      "status": "pending",
+      "createAt": "2026-03-07T01:39:35.730Z"
+    },
+    {
+      "id": 5,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 1,
+          "name": "Polo React",
+          "price": 2000,
+          "imgSrc": "/images/polos/polo-react.png",
+          "quantity": 2
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 40,
+      "status": "pending",
+      "createAt": "2026-03-07T02:02:50.231Z"
+    },
+    {
+      "id": 6,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 5,
+          "name": "Polo Backend Developer",
+          "price": 2500,
+          "imgSrc": "/images/polos/polo-backend.png",
+          "quantity": 2
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "asdasd",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 50,
+      "status": "pending",
+      "createAt": "2026-03-07T02:03:37.646Z"
+    },
+    {
+      "id": 7,
       "userId": null,
       "items": [
-        { "productId": 1, "quantity": 1 },
-        { "productId": 18, "quantity": 1 }
+        {
+          "productId": 19,
+          "name": "Taza React",
+          "price": 1399,
+          "imgSrc": "/images/tazas/taza-react.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhianSilupu@gmail.com",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 13.99,
+      "status": "pending",
+      "createAt": "2026-03-07T02:04:22.948Z"
+    }
+  ],
+  "carts": [
+    {
+      "id": 2,
+      "userId": 1,
+      "items": [
+        { "productId": 19, "quantity": 3 },
+        { "productId": 11, "quantity": 3 }
       ]
     },
-    { "id": 2, "userId": 1, "items": [{ "productId": 1, "quantity": 4 }] }
+    { "id": 4, "userId": 2, "items": [{ "productId": 18, "quantity": 1 }] },
+    { "id": 5, "userId": null, "items": [{ "productId": 2, "quantity": 1 }] }
   ],
   "users": [
     {
       "id": 1,
       "email": "christhian2524@gmail.com",
-      "password": "$2b$10$ahw5vEuZt1N5xFp5dF/E3O91KFySBB1sjXZnQievt8gNVkln7qnZi"
+      "password": "$2b$10$pLzYgdXDpgRKe5YGJcf1pOAl1mFFgl6tSSrhaPZ51UK8V3SeQ3HN2"
+    },
+    {
+      "id": 2,
+      "email": "christhian2524@gmail.com1",
+      "password": "$2b$10$PZdlUFS7QRq7e0O2wjAR1OSceVFSn9SQJtF4ZEKlsi4t6ZEvFXGaG"
     }
   ]
 }

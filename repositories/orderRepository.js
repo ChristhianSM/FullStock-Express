@@ -33,3 +33,23 @@ export async function findById(id) {
 
   return orderFinded;
 }
+
+export async function updateUserIdByEmail(email, userId) {
+  // email = christhian2524@gmail.com1
+  const data = await getData();
+
+  if (!data.orders) return null;
+
+  data.orders = data.orders.map((order) => {
+    if (email === order.shippingInfo.email) {
+      return {
+        ...order,
+        userId,
+      };
+    }
+
+    return order;
+  });
+
+  await saveData(data);
+}

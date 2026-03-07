@@ -14,6 +14,7 @@ export async function renderCheckout(req, res) {
 
 export async function placeOrder(req, res) {
   const cardId = req.cartId;
+  const userId = req.user?.id;
   const shippingInfo = req.body;
 
   const cart = await cartService.getCart(cardId);
@@ -25,7 +26,12 @@ export async function placeOrder(req, res) {
     );
   }
 
-  const order = await orderService.processCheckout(cardId, shippingInfo, cart);
+  const order = await orderService.processCheckout(
+    cardId,
+    shippingInfo,
+    cart,
+    userId,
+  );
   const orderId = order.id;
 
   res.redirect(`/order-confirmation?orderId=${orderId}`);

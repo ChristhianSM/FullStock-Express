@@ -1,5 +1,6 @@
 import * as authService from "../services/authService.js";
 import * as cartService from "../services/cartService.js";
+import * as orderService from "../services/orderService.js";
 import { clearCookie, setCookie } from "../utils/cookiesUtils.js";
 
 export async function renderSignup(req, res) {
@@ -21,6 +22,9 @@ export async function handleSignup(req, res) {
     const newUser = await authService.signup(email, password, confirmPassword);
 
     setCookie(res, "userId", newUser.id, { signed: true });
+
+    // Vinculamos las ordenes pasadas que usuaron este email
+    await orderService.linkPastOrderByEmail(newUser.email, newUser.id);
 
     // fusionamos el carrito de invitado con el carrito del usuario recien creado
     if (req.cartId) {

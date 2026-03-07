@@ -5,7 +5,7 @@ export function setCookie(res, nameCookie, valueCookie, options = {}) {
     httpOnly: true,
     maxAge: MAX_AGE,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
   };
 
   res.cookie(nameCookie, valueCookie, {

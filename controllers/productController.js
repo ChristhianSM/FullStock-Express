@@ -11,8 +11,6 @@ export async function renderProductsByCategory(req, res) {
   const minPrice = parsePriceToCents(minPriceQuery); // Null;
   const maxPrice = parsePriceToCents(maxPriceQuery);
 
-  // console.log({ minPrice, maxPrice });
-
   const filters = { minPrice, maxPrice }; //{ minPrice: null, maxPrice: 100 }
 
   const category = await categoryService.getCategoryBySlug(slug);

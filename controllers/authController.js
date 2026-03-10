@@ -48,6 +48,7 @@ export async function renderLogin(req, res) {
 }
 
 export async function handleLogin(req, res) {
+  console.log(req.user, "Aquii");
   if (req.user) {
     return res.redirect("/");
   }

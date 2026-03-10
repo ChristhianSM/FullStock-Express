@@ -21,7 +21,7 @@ export async function findByUserId(userId) {
     data.carts = [];
   }
 
-  return data.carts.find((cart) => cart.userId === userId);
+  return data.carts.find((cart) => cart.userId === userId) || null;
 }
 
 // Crea una nueva función create() (sin argumentos). Esta función debe:

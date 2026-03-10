@@ -566,19 +566,137 @@
       "total": 13.99,
       "status": "pending",
       "createAt": "2026-03-07T02:04:22.948Z"
+    },
+    {
+      "id": 8,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 1,
+          "name": "Polo React",
+          "price": 2000,
+          "imgSrc": "/images/polos/polo-react.png",
+          "quantity": 2
+        },
+        {
+          "productId": 19,
+          "name": "Taza React",
+          "price": 1399,
+          "imgSrc": "/images/tazas/taza-react.png",
+          "quantity": 2
+        },
+        {
+          "productId": 12,
+          "name": "Sticker Git",
+          "price": 399,
+          "imgSrc": "/images/stickers/sticker-git.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "asdasd",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 71.97,
+      "status": "pending",
+      "createAt": "2026-03-10T00:28:15.912Z"
+    },
+    {
+      "id": 9,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 1,
+          "name": "Polo React",
+          "price": 2000,
+          "imgSrc": "/images/polos/polo-react.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "asdasd",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 20,
+      "status": "pending",
+      "createAt": "2026-03-10T00:29:24.779Z"
+    },
+    {
+      "id": 10,
+      "userId": 2,
+      "items": [
+        {
+          "productId": 18,
+          "name": "Taza JavaScript",
+          "price": 1499,
+          "imgSrc": "/images/tazas/taza-js.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian2524@gmail.com1",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 14.99,
+      "status": "pending",
+      "createAt": "2026-03-10T00:30:10.961Z"
+    },
+    {
+      "id": 11,
+      "userId": 3,
+      "items": [
+        {
+          "productId": 11,
+          "name": "Sticker React",
+          "price": 249,
+          "imgSrc": "/images/stickers/sticker-react.png",
+          "quantity": 1
+        }
+      ],
+      "shippingInfo": {
+        "email": "christhian@gmail.com",
+        "firstName": "Christhian Juan",
+        "lastName": "Silupú Moscol",
+        "company": "",
+        "address": "Jiron H 260 Urbanizacion San jose Piura, Casa verde con Rejas negras, al frente hay una cevicheria llamada Don Noe.",
+        "city": "PIURA - PIURA",
+        "country": "PE",
+        "region": "PIURA",
+        "zipCode": "20000",
+        "phone": "+51959686193"
+      },
+      "total": 2.49,
+      "status": "pending",
+      "createAt": "2026-03-10T00:31:07.127Z"
     }
   ],
   "carts": [
-    {
-      "id": 2,
-      "userId": 1,
-      "items": [
-        { "productId": 19, "quantity": 3 },
-        { "productId": 11, "quantity": 3 }
-      ]
-    },
-    { "id": 4, "userId": 2, "items": [{ "productId": 18, "quantity": 1 }] },
-    { "id": 5, "userId": null, "items": [{ "productId": 2, "quantity": 1 }] }
+    { "id": 1, "userId": 1, "items": [] },
+    { "id": 2, "userId": null, "items": [] }
   ],
   "users": [
     {
@@ -590,6 +708,11 @@
       "id": 2,
       "email": "christhian2524@gmail.com1",
       "password": "$2b$10$PZdlUFS7QRq7e0O2wjAR1OSceVFSn9SQJtF4ZEKlsi4t6ZEvFXGaG"
+    },
+    {
+      "id": 3,
+      "email": "christhian@gmail.com",
+      "password": "$2b$10$253fuCmzFrHCCRkKjOazqOFihrgsme7tCfz7eVNcLYnS.EFqV/Tjq"
     }
   ]
 }

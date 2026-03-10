@@ -18,7 +18,6 @@ export async function authContext(req, res, next) {
 
   // caso 3: Si el userId Existe, buscamos al usuario
   const user = await userService.getUserById(parseInt(userId));
-  console.log(user);
 
   // Si el usuario no existe en mi base de datos, limpiamos la cookie
   if (!user) {
@@ -28,8 +27,6 @@ export async function authContext(req, res, next) {
 
   req.user = user;
   res.locals.user = user;
-
-  console.log(req.user, "aQUIII");
 
   next();
 }

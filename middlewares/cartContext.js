@@ -2,6 +2,8 @@ import * as cartService from "../services/cartService.js";
 import { clearCookie } from "../utils/cookiesUtils.js";
 
 function injectCart(req, res, cart) {
+  if (!cart) return;
+
   req.cart = cart;
   req.cartId = cart.id;
   res.locals.countCartProducts = cart.items.reduce(
@@ -21,14 +23,11 @@ export async function cartContext(req, res, next) {
   if (req.user) {
     if (cartIdCookie !== undefined) clearCookie(res, "cartId");
     const cart = await cartService.getCartByUserId(req.user.id);
-    if (!cart) return;
 
     injectCart(req, res, cart);
 
     return next();
   }
-
-  console.log("Entroo");
 
   // Caso 2: la cookie esta corrompida
   if (cartIdCookie === false) {
@@ -48,8 +47,6 @@ export async function cartContext(req, res, next) {
   } else {
     injectCart(req, res, cart);
   }
-
-  // req.cartId = cartIdCookie ? Number(cartIdCookie) : null;
 
   next();
 }

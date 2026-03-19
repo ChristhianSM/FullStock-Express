@@ -1,38 +1,48 @@
 // Seleccionar los elementos necesarios
-const inputPassword = document.querySelector("#password");
-inputPassword.classList.add("password-input__field");
-
-// Creamos el contenedor y el boton de toggle
-const containerDivInput = document.createElement("div");
-containerDivInput.classList.add("password-input");
-
-const buttonToggle = document.createElement("button");
-buttonToggle.type = "button";
-buttonToggle.classList.add(
-  "password-input__toggle",
-  "button",
-  "button--ghost",
-  "button--sm-icon",
+const inputsPassword = document.querySelectorAll(
+  "input[type='password'][data-toggle-password]",
 );
 
-const imgToggle = document.createElement("img");
-imgToggle.src = "/images/icons/eye.svg";
-imgToggle.alt = "Mostrar contraseña";
+inputsPassword.forEach((inputPassword) => {
+  inputPassword.classList.add("password-input__field");
 
-// Introducir la imagen dentro del boton
-buttonToggle.appendChild(imgToggle);
+  // Creamos el contenedor y el boton de toggle
+  const containerDivInput = document.createElement("div");
+  containerDivInput.classList.add("password-input");
 
-// Introducir el container como hermano previo del input
-inputPassword.before(containerDivInput);
+  const buttonToggle = document.createElement("button");
+  buttonToggle.type = "button";
+  buttonToggle.classList.add(
+    "password-input__toggle",
+    "button",
+    "button--ghost",
+    "button--sm-icon",
+  );
+  buttonToggle.ariaLabel = "Mostrar Contraseña";
 
-//  Envolver el input password dentro del contenedor
-containerDivInput.append(inputPassword);
-containerDivInput.append(buttonToggle);
+  const imgToggle = document.createElement("img");
+  imgToggle.src = "/images/icons/eye.svg";
+  imgToggle.alt = "Mostrar contraseña";
 
-// Agregar un evento al boton toggle
-buttonToggle.addEventListener("click", (event) => {
-  const isPasswordType = inputPassword.type === "password";
+  // Introducir la imagen dentro del boton
+  buttonToggle.appendChild(imgToggle);
 
-  inputPassword.type = isPasswordType ? "text" : "password";
-  imgToggle.src = `/images/icons/${isPasswordType ? "eye-off" : "eye"}.svg`;
+  // Introducir el container como hermano previo del input
+  inputPassword.before(containerDivInput);
+
+  //  Envolver el input password dentro del contenedor
+  containerDivInput.append(inputPassword);
+  containerDivInput.append(buttonToggle);
+
+  // Agregar un evento al boton toggle
+  buttonToggle.addEventListener("click", (_event) => {
+    const isPasswordType = inputPassword.type === "password";
+
+    inputPassword.type = isPasswordType ? "text" : "password";
+    imgToggle.src = `/images/icons/${isPasswordType ? "eye-off" : "eye"}.svg`;
+
+    buttonToggle.ariaLabel = isPasswordType
+      ? "Ocultar Contraseña"
+      : "Mostrar contraseña";
+  });
 });

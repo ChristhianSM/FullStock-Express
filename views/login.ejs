@@ -1,4 +1,6 @@
 <!-- views/login.ejs -->
+<script src="/js/toggle-password.js" type="module"></script>
+
 <section class="section">
   <div class="container login">
     <h1 class="login__title">Inicia sesión en tu cuenta</h1>
@@ -21,8 +23,9 @@
           id="password"
           name="password"
           type="password"
-          required
+          data-toggle-password
           autocomplete="current-password"
+          required
         />
       </div>
       <button type="submit" class="button button--lg login__submit">
@@ -36,5 +39,3 @@
     </form>
   </div>
 </section>
-
-<script src="/js/toggle-password.js"></script>

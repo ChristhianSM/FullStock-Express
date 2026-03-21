@@ -13,6 +13,23 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/index.css" />
+
+    <script>
+      (function () {
+        const theme = localStorage.getItem("theme"); // [dark, light, null, cualquierString]
+        const systemThemeIsDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches; // [dark, light]
+
+        if (theme === "dark" || theme === "light") {
+          document.documentElement.classList.add(theme);
+        } else {
+          document.documentElement.classList.add(
+            systemThemeIsDark ? "dark" : "light",
+          );
+        }
+      })();
+    </script>
   </head>
 
   <body>
@@ -24,7 +41,8 @@
         <%- body %>
       </main>
 
-      <%# Footer %> <%- include("./partials/footer.ejs") %>
+      <%# Footer %>
+      <%- include("./partials/footer.ejs") %>
     </div>
   </body>
 </html>

@@ -8,10 +8,11 @@ export async function renderProductsByCategory(req, res) {
   const { minPrice: minPriceQuery, maxPrice: maxPriceQuery } = req.query;
 
   // Validar los queries Strings
-  const minPrice = parsePriceToCents(minPriceQuery); // Null;
+  const minPrice = parsePriceToCents(minPriceQuery); // Null o el valor;
   const maxPrice = parsePriceToCents(maxPriceQuery);
 
-  const filters = { minPrice, maxPrice }; //{ minPrice: null, maxPrice: 100 }
+  const minPriceValue = minPrice !== null ? minPrice : -Infinity;
+  const maxPriceValue = maxPrice !== null ? maxPrice : Infinity;
 
   const category = await categoryService.getCategoryBySlug(slug);
 
@@ -22,15 +23,21 @@ export async function renderProductsByCategory(req, res) {
     );
   }
 
-  const products = await productService.getProductsByCategory(
-    category.id,
-    filters,
-  );
+  const products = await productService.getProductsByCategory(category.id);
+
+  const productsWithVisibility = products.map((product) => {
+    const isVisible =
+      product.price >= minPriceValue && product.price <= maxPriceValue;
+    return {
+      ...product,
+      isVisible,
+    };
+  });
 
   res.render("category", {
     namePage: category.name,
     category,
-    products,
+    products: productsWithVisibility,
     minPrice: minPriceQuery || "",
     maxPrice: maxPriceQuery || "",
   });

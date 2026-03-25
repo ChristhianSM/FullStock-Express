@@ -45,11 +45,14 @@
           href="/cart"
           class="button button--ghost button--xl-icon header-actions__cart"
           aria-label="Carrito de compras"
+          data-js="cart-link"
         >
           <img src="/images/icons/cart.svg" alt="Carrito de compras" />
-          <span class="header-actions__cart-badge"
+          <% if (countCartProducts > 0) { %>
+          <span class="header-actions__cart-badge" data-js="cart-badge"
             ><%= countCartProducts %></span
           >
+          <% } %>
         </a>
       </div>
     </div>

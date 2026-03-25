@@ -59,6 +59,8 @@
 	/* Tokens de color */
 	--background: var(--base-background);
 	--foreground: var(--neutral-12);
+	--muted-background: var(--neutral-a2);
+  --muted-foreground: var(--neutral-11);
 	--primary: var(--accent-9);
 	--primary-hover: var(--accent-10);
 	--secondary: var(--neutral-12);

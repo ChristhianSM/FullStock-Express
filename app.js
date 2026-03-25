@@ -19,6 +19,9 @@ const app = express();
 // Parsear los datos de un formulario
 app.use(express.urlencoded({ extended: false }));
 
+// Parsear datos de un JSON
+app.use(express.json());
+
 // Middleware para manejo de cookies
 app.use(cookieParser(process.env.COOKIE_SECRET));
 

@@ -1,3 +1,11 @@
+<script type="module">
+  import { mountCart } from "/js/cart.js";
+  const cartContainer = document.querySelector("[data-js='cart-container']");
+  if (cartContainer) {
+    mountCart(cartContainer);
+  }
+</script>
+
 <section class="section">
   <% if(cartItems.length === 0) { %>
   <div>
@@ -5,11 +13,15 @@
     <h2>No hay productos en tu carrito de compras</h2>
   </div>
   <% } else { %>
-  <div class="container cart">
+  <div class="container cart" data-js="cart-container">
     <h1 class="cart__title">Carrito de compras</h1>
     <div class="cart__container">
       <% cartItems.forEach((item) => { %>
-      <div id="<%= `product-${item.productId}` %>" class="cart__item">
+      <div
+        id="<%= `product-${item.productId}` %>"
+        class="cart__item"
+        data-js="cart-item"
+      >
         <div class="cart__item-image">
           <img
             src="<%= item.product.imgSrc %>"

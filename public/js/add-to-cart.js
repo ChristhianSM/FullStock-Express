@@ -18,11 +18,9 @@ if (formAddProductToCart) {
     buttonAddToCart.textContent = "Agregando...";
 
     // Convertir los datos del input a formato JSON
-    const productId = form.elements.productId.value;
-    const plainObject = {
-      productId,
-    };
-    const body = JSON.stringify(plainObject);
+    const formData = new FormData(form);
+    const plainObjectForm = Object.fromEntries(formData);
+    const body = JSON.stringify(plainObjectForm);
 
     try {
       const response = await fetch(url, {

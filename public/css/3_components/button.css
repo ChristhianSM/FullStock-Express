@@ -9,8 +9,8 @@
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
-  color: var(--foreground);
-  background-color: var(--background);
+  color: var(--neutral-contrast);
+  background-color: var(--primary);
   transition: colors 0.2s;
   cursor: pointer;
 }

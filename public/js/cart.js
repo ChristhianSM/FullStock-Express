@@ -1,3 +1,5 @@
+import { updatebadge } from "/js/header.js";
+
 export function mountCart(parent) {
   parent.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -7,24 +9,38 @@ export function mountCart(parent) {
     const url = form.action;
     const method = form.method;
 
+    // bloquear los botones para evitar multiples llamadas al servidor
+    const buttons = parent.querySelectorAll("button");
+    buttons.forEach((button) => {
+      button.disabled = true;
+    });
+
     // Construimos el body
     const formData = new FormData(form);
     const plainObject = Object.fromEntries(formData);
     const body = JSON.stringify(plainObject);
 
-    const response = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body,
-    });
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body,
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    // Construimos la UI en base a la data obtenida de la peticion;
-    parent.innerHTML = renderCart(data.cart);
+      // Actualizamos la cantidad de elementos del carrito
+      updatebadge(data.cart);
+
+      // Construimos la UI en base a la data obtenida de la peticion;
+      parent.innerHTML = renderCart(data.cart);
+    } catch (error) {
+      console.error(error);
+      form.submit();
+    }
   });
 }
 

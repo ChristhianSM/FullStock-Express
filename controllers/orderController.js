@@ -1,3 +1,5 @@
+import z from "zod";
+import { orderSchema } from "../public/js/shared/orderSchema.js";
 import * as cartService from "../services/cartService.js";
 import * as orderService from "../services/orderService.js";
 import { AppError } from "../utils/errorUtils.js";
@@ -9,13 +11,30 @@ export async function renderCheckout(req, res) {
   res.render("checkout", {
     cartItems: cart.items,
     total: cart.total,
+    errors: {},
+    values: {},
   });
 }
 
 export async function placeOrder(req, res) {
   const cardId = req.cartId;
   const userId = req.user?.id;
-  const shippingInfo = req.body;
+
+  const result = orderSchema.safeParse(req.body);
+
+  if (!result.success) {
+    const cart = await cartService.getCart(cardId);
+    const fieldsErrors = z.flattenError(result.error).fieldErrors;
+
+    return res.render("checkout", {
+      cartItems: cart.items,
+      total: cart.total,
+      errors: fieldsErrors,
+      values: req.body,
+    });
+  }
+
+  const shippingInfo = result.data;
 
   const cart = await cartService.getCart(cardId);
 

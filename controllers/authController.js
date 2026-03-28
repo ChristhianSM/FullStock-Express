@@ -1,3 +1,5 @@
+import z from "zod";
+import { loginSchema, signupSchema } from "../public/js/shared/authSchemas.js";
 import * as authService from "../services/authService.js";
 import * as cartService from "../services/cartService.js";
 import * as orderService from "../services/orderService.js";
@@ -7,14 +9,29 @@ export async function renderSignup(req, res) {
   if (req.user) {
     return res.redirect("/");
   }
-  res.render("signup");
+  res.render("signup", {
+    errors: {},
+    values: {},
+  });
 }
 
 export async function handleSignup(req, res) {
   if (req.user) {
     return res.redirect("/");
   }
-  const { email: emailBody, password, confirmPassword } = req.body;
+
+  const result = signupSchema.safeParse(req.body);
+
+  if (!result.success) {
+    const fieldsErrors = z.flattenError(result.error).fieldErrors;
+
+    return res.render("signup", {
+      errors: fieldsErrors,
+      values: req.body,
+    });
+  }
+
+  const { email: emailBody, password, confirmPassword } = result.data;
 
   const email = emailBody.toLowerCase();
 
@@ -44,7 +61,10 @@ export async function renderLogin(req, res) {
   if (req.user) {
     return res.redirect("/");
   }
-  res.render("login");
+  res.render("login", {
+    errors: {},
+    values: {},
+  });
 }
 
 export async function handleLogin(req, res) {
@@ -52,7 +72,18 @@ export async function handleLogin(req, res) {
     return res.redirect("/");
   }
 
-  const { email, password } = req.body;
+  const result = loginSchema.safeParse(req.body);
+
+  if (!result.success) {
+    const fieldsErrors = z.flattenError(result.error).fieldErrors;
+
+    return res.render("login", {
+      errors: fieldsErrors,
+      values: req.body,
+    });
+  }
+
+  const { email, password } = result.data;
 
   try {
     const user = await authService.login(email, password);

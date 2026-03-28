@@ -23,7 +23,7 @@
 }
  
 .login__error {
-  color: hsl(0 84% 60%); /* TODO: add to color tokens */
+  color:  var(--error);
   font-size: 0.875rem;
   line-height: 1.25rem;
   text-align: center;

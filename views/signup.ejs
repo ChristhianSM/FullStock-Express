@@ -1,9 +1,21 @@
 <script src="/js/toggle-password.js" type="module"></script>
+<script type="module">
+  import { setupValidation } from "/js/form-validation.js";
+  import { signupSchema } from "/js/shared/authSchema.js";
+
+  const formSignup = document.querySelector("[data-js='form-signup']");
+  setupValidation(formSignup, signupSchema);
+</script>
 
 <section class="section">
   <div class="container signup">
     <h1 class="signup__title">Crea una cuenta</h1>
-    <form class="signup__form" method="post" action="/auth/signup" novalidate>
+    <form
+      class="signup__form"
+      method="post"
+      action="/auth/signup"
+      data-js="form-signup"
+    >
       <div class="input-field <%= errors.email ? 'input-field--error' : '' %>">
         <label for="email">Correo electrónico</label>
         <input

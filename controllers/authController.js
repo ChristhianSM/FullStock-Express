@@ -1,5 +1,5 @@
 import z from "zod";
-import { loginSchema, signupSchema } from "../public/js/shared/authSchemas.js";
+import { loginSchema, signupSchema } from "../public/js/shared/authSchema.js";
 import * as authService from "../services/authService.js";
 import * as cartService from "../services/cartService.js";
 import * as orderService from "../services/orderService.js";
@@ -52,6 +52,7 @@ export async function handleSignup(req, res) {
   } catch (error) {
     res.render("signup", {
       error: error.message,
+      errors: {},
       values: { email },
     });
   }
@@ -99,6 +100,7 @@ export async function handleLogin(req, res) {
   } catch (error) {
     res.render("login", {
       error: error.message,
+      errors: {},
       values: { email },
     });
   }

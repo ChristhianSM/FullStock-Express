@@ -1,3 +1,11 @@
+<script type="module">
+  import { setupValidation } from "/js/form-validation.js";
+  import { orderSchema } from "/js/shared/orderSchema.js";
+
+  const formCheckout = document.querySelector("[data-js='form-checkout']");
+  setupValidation(formCheckout, orderSchema);
+</script>
+
 <% 
   const countries = [
     { code: 'AR', name: 'Argentina' },
@@ -57,7 +65,7 @@
           </div>
         </div>
       </div>
-      <form class="checkout__form" action="/checkout/place-order" method="post" novalidate>
+      <form class="checkout__form" action="/checkout/place-order" method="post" data-js='form-checkout'>
         <legend class="checkout__legend">Información de contacto</legend>
         <div class="input-field <%= errors.email ? 'input-field--error' : ''  %>">
           <label for="email">Correo electrónico</label>
@@ -155,7 +163,7 @@
                 <span class="input-field__error"><%= errors.city[0] %></span>
               <% } %>
             </div>
-            <div class="select-field <%= errors.country ? 'input-field--error' : ''  %>"" >
+            <div class="select-field <%= errors.country ? 'input-field--error' : ''  %>" >
               <label for="country">País</label>
               <select
                 id="country"

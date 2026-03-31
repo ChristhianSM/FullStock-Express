@@ -1,12 +1,24 @@
 <!-- views/login.ejs -->
 <script src="/js/toggle-password.js" type="module"></script>
+<script type="module">
+  import { setupValidation } from "/js/form-validation.js";
+  import { loginSchema } from "/js/shared/authSchema.js";
+
+  const formLogin = document.querySelector("[data-js='form-login']");
+  setupValidation(formLogin, loginSchema);
+</script>
 
 <section class="section">
   <div class="container login">
     <h1 class="login__title">Inicia sesión en tu cuenta</h1>
 
     <!-- El formulario envía los datos vía POST a la ruta /login -->
-    <form class="login__form" method="post" action="/auth/login" novalidate>
+    <form
+      class="login__form"
+      method="post"
+      action="/auth/login"
+      data-js="form-login"
+    >
       <div class="input-field <%= errors.email ? 'input-field--error' : '' %>">
         <label for="email">Correo electrónico</label>
         <input
